@@ -16,44 +16,88 @@
 */
 :- module(parser, []).
 
+
 parse(AST, Tokens) :-
         parse(AST, Tokens, []).
 
 parse(AST) -->
         expression(AST).
 
+
+%% expression
+
 expression(E) -->
         relation(E).
+
+
+%% relation
 
 relation(E) -->
         simple_expression(E).
 
+
+%% simple_expression ::= [unary_adding_operator] term {binary_adding_operator term}
+
+simple_expression(E) -->
+        unary_adding_operator(_),
+        !,
+        term(T),
+        simple_expression_aux(T, E0),
+        { E = op(E0) }.
 simple_expression(E) -->
         term(T),
         simple_expression_aux(T, E).
 
-simple_expression_aux(E1, E) -->
+simple_expression_aux(E0, E) -->
         binary_adding_operator(_),
         !,
-        term(E2),
-        simple_expression_aux(op(E1, E2), E).
+        term(T),
+        simple_expression_aux(op(E0, T), E).
 simple_expression_aux(E, E) -->
         [].
-        
-binary_adding_operator('+') -->
-        ['+'].
 
-term(E) -->
-        factor(E).
+
+%% term ::= factor {multiplying_operator factor}
+
+term(T) -->
+        factor(F),
+        term_aux(F, T).
+
+term_aux(T0, T) -->
+        multiplying_operator(_),
+        !,
+        factor(F),
+        term_aux(op(T0, F), T).
+term_aux(T, T) -->
+        [].
+
+
+%% factor
 
 factor(E) -->
         primary(E).
 
+
+%% primary
+
 primary(E) -->
         numeric_literal(E).
 
+
+%% numeric_literal
+
 numeric_literal(constant(N)) -->
         [num(N)].
+
+
+binary_adding_operator('+') --> ['+'].
+binary_adding_operator('-') --> ['-'].
+
+unary_adding_operator('+') --> ['+'].
+unary_adding_operator('-') --> ['-'].
+
+multiplying_operator('*') --> ['*'].
+multiplying_operator('/') --> ['/'].
 
 
 :- begin_tests(parser).
@@ -61,6 +105,10 @@ numeric_literal(constant(N)) -->
 test(add) :-
         parse(op(op(constant(1), constant(2)), constant(3)),
               [num(1), '+', num(2), '+', num(3)]).
+
+test(add_mul) :-
+        parse(op(constant(1), op(constant(2), constant(3))),
+              [num(1), '+', num(2), '*', num(3)]).
 
 :- end_tests(parser).
         
