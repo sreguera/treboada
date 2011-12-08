@@ -14,16 +14,22 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-:- module(treboada, []).
-
-:- use_module(lexer).
-:- use_module(parser).
-:- use_module(comp).
-:- use_module(asm).
+:- module(asm, [assemble/2]).
 
 
-compile(Input, Output) :-
-        lexer:scan(Input, Tokens),
-        parser:parse(Tokens, AST),
-        comp:compile(AST, Asm),
-        asm:assemble(Asm, Output).
+assemble(Insts, Bytes) :-
+        phrase(asm(Insts), Bytes).
+
+
+asm([]) -->
+        [].
+asm([I|Is]) -->
+        asm_inst(I),
+        asm(Is).
+
+
+asm_inst(ldc(N)) -->
+        { Op is 0x40 \/ N }, 
+        [Op].
+asm_inst(sum) -->
+        [0x25, 0xF2].
