@@ -17,11 +17,8 @@
 :- module(parser, []).
 
 
-parse(AST, Tokens) :-
-        parse(AST, Tokens, []).
-
-parse(AST) -->
-        expression(AST).
+parse(Tokens, AST) :-
+        phrase(expression(AST), Tokens).
 
 
 %% expression
@@ -103,12 +100,12 @@ multiplying_operator('/') --> ['/'].
 :- begin_tests(parser).
 
 test(add) :-
-        parse(op(op(constant(1), constant(2)), constant(3)),
-              [num(1), '+', num(2), '+', num(3)]).
+        parse([num(1), '+', num(2), '+', num(3)],
+              op(op(constant(1), constant(2)), constant(3))).
 
 test(add_mul) :-
-        parse(op(constant(1), op(constant(2), constant(3))),
-              [num(1), '+', num(2), '*', num(3)]).
+        parse([num(1), '+', num(2), '*', num(3)],
+              op(constant(1), op(constant(2), constant(3)))).
 
 :- end_tests(parser).
         

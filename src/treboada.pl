@@ -23,5 +23,5 @@
 
 compile(Input, Output) :-
         lexer:scan(Input, Tokens),
-        parser:parse(AST, Tokens),
+        parser:parse(Tokens, AST),
         comp:compile(AST, Output).

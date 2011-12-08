@@ -30,7 +30,7 @@ depth(op(E1, E2), D) :-
         ).
 
 compile(AST, Asm) :-
-        compile(AST, Asm, []).
+        phrase(compile(AST), Asm).
 
 compile(constant(C)) -->
         [ldc(C)].
