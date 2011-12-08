@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-:- module(lexer, []).
+:- module(lexer, [scan/2]).
 
 %-----------------------------------------------------------------------
 % 2.2 Lexical Elements, Separators and Delimiters
