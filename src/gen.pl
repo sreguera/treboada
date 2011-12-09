@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-:- module(comp, [compile/2]).
+:- module(gen, [generate/2]).
 
 depth(constant(_), 1).
 depth(variable(_), 1).
@@ -29,35 +29,35 @@ depth(op(E1, E2), D) :-
         ;  D is D1 + 1
         ).
 
-compile(AST, Asm) :-
-        phrase(compile(AST), Asm).
+generate(AST, Asm) :-
+        phrase(generate(AST), Asm).
 
-compile(constant(C)) -->
+generate(constant(C)) -->
         [ldc(C)].
-compile(variable(V)) -->
+generate(variable(V)) -->
         [ldl(V)].
-compile(op(E1, E2)) -->
+generate(op(E1, E2)) -->
         { depth(E1, D1) },
         { depth(E2, D2) },
         (  { D2 > D1 }
         -> (  { D1 > 2 }
-           -> compile(E2),
+           -> generate(E2),
               [stl(temp)],
-              compile(E1),
+              generate(E1),
               [ldl(temp)]
            ;  { conmutes('+') }
-           -> compile(E2),
-              compile(E1)
-           ;  compile(E2),
-              compile(E1),
+           -> generate(E2),
+              generate(E1)
+           ;  generate(E2),
+              generate(E1),
               [rev]
            )
         ;  { D2 < 3 }
-        -> compile(E1),
-           compile(E2)
-        ;  compile(E2),
+        -> generate(E1),
+           generate(E2)
+        ;  generate(E2),
            [stl(temp)],
-           compile(E1),
+           generate(E1),
            [ldl(temp)]
         ),
         [sum].
@@ -65,7 +65,7 @@ compile(op(E1, E2)) -->
 conmutes('+').
 
 
-:- begin_tests(comp).
+:- begin_tests(gen).
 
 test(depth) :-
         depth(op(constant(a),
@@ -73,4 +73,4 @@ test(depth) :-
                     constant(d))),
               2).
 
-:- end_tests(comp).
+:- end_tests(gen).

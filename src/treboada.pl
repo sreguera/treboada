@@ -18,7 +18,8 @@
 
 :- use_module(lexer).
 :- use_module(parser).
-:- use_module(comp, []).
+:- use_module(sem).
+:- use_module(gen).
 :- use_module(asm).
 :- use_module(util).
 
@@ -26,7 +27,8 @@
 compile_source(Input, Output) :-
         lexer:scan(Input, Tokens),
         parser:parse(Tokens, AST),
-        comp:compile(AST, Asm),
+        sem:analyze(AST, AAST),
+        gen:generate(AAST, Asm),
         asm:assemble(Asm, Output).
 
 
