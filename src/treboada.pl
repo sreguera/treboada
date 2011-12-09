@@ -18,12 +18,41 @@
 
 :- use_module(lexer).
 :- use_module(parser).
-:- use_module(comp).
+:- use_module(comp, []).
 :- use_module(asm).
+:- use_module(util).
 
 
-compile(Input, Output) :-
+compile_source(Input, Output) :-
         lexer:scan(Input, Tokens),
         parser:parse(Tokens, AST),
         comp:compile(AST, Asm),
         asm:assemble(Asm, Output).
+
+
+compile_file(_Opts, Input_File, Output_File) :-
+        read_file_codes(Input_File, Source),
+        compile_source(Source, Output),
+        write_file_bytes(Output_File, Output).
+
+
+compile(Opts, PosArgs) :-
+        PosArgs = [Input_File],
+        compile_file(Opts, Input_File, 'a.out').
+
+
+run :-
+        current_prolog_flag(argv, Args),
+        append(_SysArgs, ['--'|AppArgs], Args),
+        !,
+        parse_args(AppArgs, Opts, PosArgs),
+        compile(Opts, PosArgs).
+
+
+%% parse_args(+Args, -Options, -PositionalArgs)
+
+parse_args([], [], []).
+parse_args([Arg|Args], Opts, [Arg|PosArgs]) :-
+        parse_args(Args, Opts, PosArgs).
+
+        
